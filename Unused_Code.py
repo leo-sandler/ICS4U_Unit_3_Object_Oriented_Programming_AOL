@@ -20,3 +20,8 @@ print(dubas)  # calling the method through finding the space where the instantia
 Through directory/path related stuff.
 # <__main__.GeneralManager object at 0x000001A5C080E630>  THIS IS WHAT NEEDS TO BE ACCESSED.
 '''
+
+self.employee_dict[self.name] = [name, age, salary, position]
+
+# could make a dictionary for each superior employee. would look like {"Mike Babcock": [N,A,S,P][N,A,S,P]}
+# Coulc inclue password/sign in functionality.
