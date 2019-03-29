@@ -1,5 +1,6 @@
 # AT END, FIND A WAY TO MAKE SPACING EVEN. POSSIBLY, CREATE TITLES/MESSAGES AFTER SELECTING ONE OF THE OPTIONS FROM
 # ALL OPTIONS.
+import os
 
 
 class Employee:
@@ -8,6 +9,33 @@ class Employee:
         self.age = age
         self.salary = salary
         self.job = job
+
+    @staticmethod
+    def employee_file_updating(action, name, age, salary, job):
+        if action == "ADD_EMP" or "DEL_EMP":
+            employee_file = open("Employees.txt", "r")
+            employee_2d_list = [x.split(",") for x in employee_file.read().split("\n")]
+            employee_file.close()
+            emp_file = open("Employees.txt", "w")
+            if action == "ADD_EMP":
+                employee_2d_list.append([name, age, salary, job])
+                for x in range(len(employee_2d_list)):
+                    emp_file.writelines(','.join(str(y) for y in employee_2d_list[x]) + "\n")
+                emp_file.close()
+            if action == "DEL_EMP":
+                for x in range(len(employee_2d_list)):
+                    hold = employee_2d_list[x][0]
+                    if name == hold:
+                        employee_2d_list.pop(x)
+                for x in range(len(employee_2d_list)):
+                    emp_file.writelines(','.join(str(y) for y in employee_2d_list[x]) + "\n")
+                emp_file.close()
+            reading = open("Employees.txt", "rb+")
+            reading.seek(-2, os.SEEK_END)
+            reading.truncate()
+            reading.close()
+        if action == "PAY_RAISE" or "PAY_CUT":
+            print("EDITING A SINGLE SECTION OF THE EMPLOYEE DICT THEN THE TXT FILE")
 
 
 class GeneralManager(Employee):
@@ -20,21 +48,11 @@ class GeneralManager(Employee):
     def file_reading(self):
         employee_file = open("Employees.txt", "r")
         employee_2d_list = [x.split(",") for x in employee_file.read().split("\n")]
-        print(employee_2d_list)
         employee_file.close()
+        employee_2d_list.sort(key=lambda x: float(x[2]), reverse=True)
         for x in range(0, len(employee_2d_list)):
-            self.employee_dict[employee_2d_list[x][0]] = [int(employee_2d_list[x][1]), int(employee_2d_list[x][0]),
+            self.employee_dict[employee_2d_list[x][0]] = [int(employee_2d_list[x][1]), int(employee_2d_list[x][2]),
                                                           employee_2d_list[x][3]]
-
-        from operator import itemgetter
-        list_sorting = sorted(employee_2d_list, key=itemgetter(2), reverse=True)
-
-        with open("Employees.txt", 'w') as emp_file:
-            emp_file.writelines(','.join(str(j) for j in i) + '\n' for i in list_sorting)
-            # Makes a new line at the end of file. Help to stop doing this.
-            emp_file.close()
-        # Could have options for printing out the payroll. This could be in alphabetical order by multiple columns
-        # or by highest or lowest salary.
 
     @staticmethod
     def name_input():
@@ -102,24 +120,24 @@ class GeneralManager(Employee):
 
     def payroll_viewer(self):
         total_payroll = 0
+        print("\nSalaries are printed in order of salary, from highest to lowest.\n")
         for x in self.employee_dict.keys():
             print(self.employee_dict[x][2] + ": " + x + "'s salary is $" + "{:,}".format(self.employee_dict[x][1]))
             total_payroll += self.employee_dict[x][1]
         print("\nThe total payroll is $" + "{:,}".format(total_payroll))
 
     def vendor_creation(self):
-        vendor_name = input("What is the name of the new vendor: ").title()
+        vendor_name = input("\nWhat is the name of the new vendor: ").title()
         vendor = Vendor(vendor_name)
         self.vendor_dict[vendor_name] = vendor
         vendor.add_or_remove_products("A")
-        '''
-        vendor_file = open("Vendors.txt", "w+")
-        count = len(vendor_file.read().split()) - 1
-        vendor_file.write(str(vendor[count + 1]) + ", " + str(vendor.product_offerings[count + 1]) + "\n")
+        # MAKE A VENDOR_FILE_UPDATING FUNCTION
+        vendor_file = open("Vendors.txt", "a")
+        vendor_offerings_list = []
+        for k, v in vendor.product_offerings.items():
+            vendor_offerings_list.append(str(k) + ", $" + str(v))
+        vendor_file.write(str(vendor_name) + "," + str([y for y in vendor_offerings_list]) + '\n')
         vendor_file.close()
-        vend = open("Vendors.txt", "r")
-        print(vend.read())
-        '''
 
     def vendor_removal(self):
         while True:
@@ -135,10 +153,10 @@ class GeneralManager(Employee):
                 add_or_remove = input("Do you want to add or remove products: ").title()
                 if add_or_remove == "Add":
                     self.vendor_dict[vendor_name].add_or_remove_product("A")
+                    break
                 if add_or_remove == "Remove":
                     self.vendor_dict[vendor_name].add_or_remove_product("R")
-            else:
-                continue
+                    break
 
     def offerings_for_all_vendors(self):
         for x in self.vendor_dict:
@@ -151,7 +169,7 @@ class GeneralManager(Employee):
             name = self.name_input()
             age = self.age_input()
             salary = self.salary_input()
-            job = ""  # Preventing an error.
+            job = ""  # Making an empty String
             if name not in self.employee_dict:
                 if position == 1:
                     Employee(name, age, salary, "Vendor Employee")
@@ -168,13 +186,17 @@ class GeneralManager(Employee):
                 if position == 5:
                     exit()
                 self.employee_dict[name] = [age, salary, job]
+                self.employee_file_updating("ADD_EMP", name, age, salary, job)  # Writing to the text file
                 break
 
     def firing(self):
         while True:
-            employee_choice = input("What employee do you want to fire: ")
+            employee_choice = input("What employee do you want to fire: ").title()
             if employee_choice in self.employee_dict:
+                self.employee_file_updating("DEL_EMP", employee_choice, self.employee_dict[employee_choice][0], self.
+                                            employee_dict[employee_choice][1], self.employee_dict[employee_choice][2])
                 del self.employee_dict[employee_choice]
+                break
 
     def pay_raise(self):
         while True:
@@ -184,6 +206,8 @@ class GeneralManager(Employee):
                     raise_amount = int(input("How large is the raise: $"))
                     if raise_amount >= 1:
                         self.employee_dict[employee_choice][1] += raise_amount
+                        # UPDATING THE TEXT FILE AT ONLY ONE POINT. FOR EXAMPLE, EMPLOYEE PAY IS THE ONLY THING CHANGED
+                        # NEED TO FIGURE OUT HOW TO ONLY WRITE THIS TO THE TEXT FILE.
                         break
                 except ValueError:
                     print("Enter a number into the raise amount.")
@@ -209,28 +233,28 @@ class Vendor:
         count = 0
         while count < number_of_products:
             if a_or_r == "A":
-                product = input("\nNew Product: ")
+                product = input("\nNew Product: ").title()
                 if product.isdigit():
                     print("Enter a product to be sold, not a number.")
                     continue
-                if product.title() in self.product_offerings:
+                if product in self.product_offerings:
                     print("The " + self.name + " already has that product")
                     continue
                 try:
-                    price = int(input("Enter the price of " + product.title() + ": $"))
+                    price = int(input("Enter the price of " + product + ": $"))
                     if price <= -1:
                         continue
                 except ValueError:
                     print("Enter a price")
                     continue
-                self.product_offerings[product.title()] = price
+                self.product_offerings[product] = price
             if a_or_r == "R":
-                product = input("\nProduct: ")
+                product = input("\nProduct: ").title()
                 if product.isdigit():
                     print("Enter a product, not a number.")
                     continue
-                if product.title() in self.product_offerings:
-                    del self.product_offerings[product.title()]
+                if product in self.product_offerings:
+                    del self.product_offerings[product]
                     print(str(product) + " was removed from this vendor.")
             count += 1
 
@@ -241,6 +265,9 @@ class Vendor:
 
 
 '''
+Not using for now. These would only be used when signing in individually. However, I don't think that I will
+be able to incorporate this into the code due to time concerns.
+
 class VendorManager(Employee):
     def __init__(self, name, age, salary, job):
         super().__init__(name, age, salary, job)
@@ -252,11 +279,11 @@ class HeadCoach(Employee):
         
 '''
 
-# Which would better show off my OOP skills. 1: the GM has the ability to control everything. Employee position(Outside
-# of skaters) is determined by the GM. The code is ran through the perspective of the GM.
+# The GM has the ability to control everything. Employee position(Outside of skaters) is determined by the GM. The code
+# is ran through the perspective of the GM. Should include coach functionality with line-up functions.
 
-# 2: Employees are created with passwords. This will allow for the python code to act as a database where some employees
-# have specific privileges where others do not.
+# IF TIME: Employees are created with passwords. This will allow for the python code to act as a database where some
+# employees have specific privileges where others do not.
 
 
 class Skater(Employee):
@@ -297,11 +324,11 @@ class Goalie(Employee):
                           "Winning Percentage": self.win_percentage, "Shutouts": self.shutouts}
 
 
-dubas = GeneralManager()
-dubas.all_options()
+kyle_dubas = GeneralManager()
+kyle_dubas.all_options()
 
 
-print(dubas.__class__.__name__)
+print(kyle_dubas.__class__.__name__)
 
 '''
 fred = Employee("Frederick Andersen", 29, 5000000)

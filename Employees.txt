@@ -1,7 +1,7 @@
-Michael Scott,56,80000,Vendor Manager
-Mike Babcock,55,6250000,Head Coach
-Dwight Schrute,53,55000,Vendor Employee
-Jim Hiller,49,400000,Assistant Coach
-Andrew Brewer,33,400000,Assistant Coach
-DJ Smith,41,400000,Assistant Coach
 Kyle Dubas,33,1500000,General Manager
+Mike Babcock,55,6250000,Head Coach
+Jim Hiller,49,450000,Assistant Coach
+Andrew Brewer,33,430000,Assistant Coach
+DJ Smith,41,440000,Assistant Coach
+Michael Scott,56,80000,Vendor Manager
+Dwight Schrute,53,55000,Vendor Employee

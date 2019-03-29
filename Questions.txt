@@ -1,0 +1,9 @@
+NEEDs:
+Updating the TXT file at only one point. For example, changing employee pay within the pay raise function.
+
+
+
+WANTs:
+Suggestions for avoiding dupicate code?
+
+How to know when enough functionality is incorporated into this?
