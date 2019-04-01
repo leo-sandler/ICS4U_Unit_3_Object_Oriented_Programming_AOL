@@ -1,3 +1,0 @@
-1) Updating the TXT file at only one point. For example, changing employee pay within the pay raise function.
-
-2) Make list of tasks, in the form of a README file.
