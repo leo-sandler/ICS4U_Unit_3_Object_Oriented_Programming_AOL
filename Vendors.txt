@@ -1,2 +1,2 @@
-Food,['Drink,2', 'Pizza,4']
 Merchandise,['Hat,30', 'Jersey,100']
+Food,['Pizza,5', 'Drink,3']

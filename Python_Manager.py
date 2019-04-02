@@ -71,9 +71,10 @@ class Employee:
             employee_2d_list.sort(key=lambda z: float(z[2]), reverse=True)  # Sorting again, as an employee
             # is added to the list, and may have a higher salary than some others.
         if action == "DEL_EMP":
-            for x in range(len(employee_2d_list)):
-                if name == employee_2d_list[x][0]:
-                    employee_2d_list.pop(x)  # Removing this employee from the list, according to the action parameter.
+            for x in range(0, len(employee_2d_list)):
+                if name == str(employee_2d_list[x][0]):
+                    del employee_2d_list[x]  # Removing this employee from the list, according to the action parameter.
+                    break
         if action == "EMP_PAY":
             for n in range(len(employee_2d_list)):
                 if employee_2d_list[n][0] == name:  # Checking where the existing employee is in the 2d list, so their
@@ -81,6 +82,7 @@ class Employee:
                     employee_2d_list[n][2] = salary  # Changing the value of the list section to the updated salary.
                     employee_2d_list.sort(key=lambda z: float(z[2]), reverse=True)  # Sorting again, as an employee
                     # salary value has changed.
+                    break
         for x in range(len(employee_2d_list)):
             emp_file.writelines(','.join(str(y) for y in employee_2d_list[x]) + "\n")  # Writing the list to the
             # text file via write lines and list comprehension.
@@ -101,7 +103,6 @@ class GeneralManager(Employee):  # This class inherits from the Employee class.
         # fulfill the 4 parameters from the employee class. As well, I set these 4 values to the same thing, as there
         # is only one General Manager. Therefore, the "=" signs allow for me to instantiate this class in the same
         # way each time.
-        self.vendor_products_dict = {}  # Storing products and prices at key values of vendors.
         self.vendor_instances = {}  # Storing the vendor class instantiation location at the key of the vendor's name.
         self.employee_dict = {}  # Storing the age, salary, and position data at the key of the employee's name.
         self.employee_file_reading()
@@ -218,6 +219,7 @@ class GeneralManager(Employee):  # This class inherits from the Employee class.
                 self.vendor_instances[vendor_name] = vendor  # Adding to the vendor_instances dictionary.
                 vendor.add_or_remove_products("A", True)  # Adding products to the new vendor.
                 break
+            print("The " + vendor_name + " vendor was created.")
 
     '''
     The vendor_creation function uses a user input to create an instance of the Vendor class. Products are added
@@ -228,15 +230,15 @@ class GeneralManager(Employee):  # This class inherits from the Employee class.
         while True:
             removal_name = input("\nWhat vendor do you want to remove: ").title()  # Sensing for which vendor is
             # being removed.
-            if removal_name in self.vendor_products_dict:  # Checking that the vendor exists already.
+            if removal_name in self.vendor_instances.keys():  # Checking that the vendor exists already.
                 self.vendor_instances[removal_name].vendor_file_updating("Removal")  # Updating the text file.
-                del self.vendor_products_dict[removal_name]
-                del self.vendor_instances[removal_name]  # Removing this vendor from both dicts.
+                del self.vendor_instances[removal_name]  # Removing this vendor from the dict.
                 break  # Ending the while loop.
+            print("The " + removal_name + " vendor was removed.")
 
     '''
     The vendor_removal function uses a user input to remove an instance of the Vendor class. The text file is updated
-    along with both dictionaries. This uses a while loop for continual input until the condition(the fact that the 
+    along with the dictionary. This uses a while loop for continual input until the condition(the fact that the 
     vendor already exists) is satisfied.
     '''
 
@@ -245,7 +247,7 @@ class GeneralManager(Employee):  # This class inherits from the Employee class.
             vendor_name = input(str("Enter the name of the vendor you want to edit: ")).title()
             for x in self.vendor_instances.keys():
                 if x == vendor_name:  # Checking if the vendor exists.
-                    add_or_remove = input("(Add/Remove)Do you want to add or remove products: ").title()
+                    add_or_remove = input("(Add/Remove)Do you want to add or remove a product: ").title()
                     if add_or_remove == "Add":
                         self.vendor_instances[x].add_or_remove_products("A", False)  # Calling the add function
                         # according to the vendor instance within the loop.
@@ -275,27 +277,28 @@ class GeneralManager(Employee):  # This class inherits from the Employee class.
         while True:  # While loop
             position = int(input("\nThese are the available positions to hire for.\n1) Vendor Employee\n2) "
                                  "Vendor Manager\n3) Head Coach\n4) Assistant Coach\n5) EXIT\nYour Choice: "))
+            job = ""  # Initializing a string.
+            if position == 1:
+                job = "Vendor Employee"
+            if position == 2:
+                job = "Vendor Manager"
+            if position == 3:
+                job = "Head Coach"
+            if position == 4:
+                job = "Assistant Coach"  # Employee job is set through changing the string.
+            if position == 5:
+                self.all_options()
             name = self.name_input()  # Using Employee static methods to store data. The methods function with self
             # as a result of the inheritance.
             age = self.age_input()
             salary = self.salary_input()
-            job = ""  # Initializing a string.
             if name not in self.employee_dict:  # If the employee does not exist.
-                if position == 1:
-                    job = "Vendor Employee"
-                if position == 2:
-                    job = "Vendor Manager"
-                if position == 3:
-                    job = "Head Coach"
-                if position == 4:
-                    job = "Assistant Coach"  # Employee job is set through changing the string.
-                if position == 5:
-                    exit()
                 Employee(name, age, salary, "Assistant Coach")  # Making an instance of the employee class.
                 self.employee_dict[name] = [age, salary, job]  # Updating the dictionary stored within GM for this new
                 # employee.
                 self.employee_file_updating("ADD_EMP", name, age, salary, job)  # Updating the text file.
                 break
+            print(name + " was hired.")
 
     '''
     The hiring uses a while loop for position selection. The employee's attributes are set through static methods from
@@ -304,21 +307,23 @@ class GeneralManager(Employee):  # This class inherits from the Employee class.
 
     def firing(self):  # The seventh option within the all_options function.
         while True:
-            employee_choice = input("What employee do you want to fire: ").title()  # .title() for capitalization.
+            employee_choice = input("\nWhat employee do you want to fire: ").title()  # .title() for capitalization.
             if employee_choice in self.employee_dict:  # Checking that the employee exists.
-                self.employee_file_updating("DEL_EMP", employee_choice, self.employee_dict[employee_choice][0], self.
-                                            employee_dict[employee_choice][1], self.employee_dict[employee_choice][2])
+                self.employee_file_updating("DEL_EMP", employee_choice, self.employee_dict[employee_choice][0],
+                                            self.employee_dict[employee_choice][1],
+                                            self.employee_dict[employee_choice][2])
                 # Employee file is updated, through deleting this employee.
-                del self.employee_dict[employee_choice]  # The employee is deleted from the dictionary.
                 break
+        print(employee_choice + " was fired.")
+        del self.employee_dict[employee_choice]  # The employee is deleted from the dictionary.
 
     '''
-    The firing funciton checks if the selected employee exists, then removes them from the dictionary and text file.
+    The firing function checks if the selected employee exists, then removes them from the dictionary and text file.
     '''
 
     def pay_raise_or_cut(self, r_or_c):  # The eighth and ninth option within the all_options function.
         while True:
-            employee_choice = input("Whose pay do you want to raise/cut: ").title()
+            employee_choice = input("\nWhose pay do you want to raise/cut: ").title()
             if employee_choice in self.employee_dict.keys():  # Checking if the employee exists.
                 try:  # Try statement.
                     if r_or_c.upper() == "R":  # Pay raise sensing.
@@ -354,39 +359,34 @@ class GeneralManager(Employee):  # This class inherits from the Employee class.
 class Vendor:
     def __init__(self, name):
         self.name = name  # Vendor name attribute, filled through the parameter during initialization.
-        self.product_offerings = {}
+        self.product_offerings = {}  # Storing the vendor products as keys and prices as key values.
+
+    '''
+    The Vendor class is instantiated along with the name input. The vendor stores products and their corresponding
+    prices within a dictionary. Vendors are also synchronized with text files.
+    '''
 
     def add_or_remove_products(self, a_or_r, new):
-        while True:
-            try:
-                number_of_products = int(input("How many products do you want to add/remove: "))
-                if number_of_products <= 0:
-                    print("Enter a number higher than 0.")
-                    continue
-                break
-            except ValueError:
-                print("Enter a number please.")
-                continue
-        count = 0
-        while count < number_of_products:
-            if a_or_r == "A":
+        while True:  # While loop
+            if a_or_r == "A":  # Sensing for the parameter, for a product addition.
                 product = input("\nNew Product: ").title()
-                if product.isdigit():
+                if product.isdigit():  # Ensuring that the product is not a number.
                     print("Enter a product to be sold, not a number.")
                     continue
-                if product in self.product_offerings:
+                if product in self.product_offerings:  # Protecting against duplicate products.
                     print("The " + self.name + " vendor already has that product")
                     continue
                 try:
                     price = int(input("Enter the price of " + product + ": $"))
-                    if price <= 0:
+                    if price <= 0:  # Making sure that the product has a price, where the organization gains money.
                         continue
                 except ValueError:
                     print("Enter a price.")
                     continue
-                self.product_offerings[product] = price
-                print(product + " was added to the " + self.name + " vendor.")
-            if a_or_r == "R":
+                self.product_offerings[product] = price  # New dictionary entry within the vendor's product_offerings
+                # dictionary, at the key of the new product. The price is the key value.
+                print(product + " was added to the " + self.name + " vendor.")  # Notifying the user.
+            if a_or_r == "R":  # The remove section works the same way, with del to remove the product from the dict.
                 product = input("\nProduct: ").title()
                 if product.isdigit():
                     print("Enter a product, not a number.")
@@ -394,62 +394,104 @@ class Vendor:
                 if product in self.product_offerings:
                     del self.product_offerings[product]
                     print(str(product) + " was removed from this vendor.")
-            count += 1
-
-        if new:
-            self.vendor_file_updating("Creation")
-        elif not new:
+            break  # Loop ends after one cycle.
+        if new:  # Using the parameter to check if the vendor is new. This will be satisfied if the new parameter
+            # is filled in as true.
+            self.vendor_file_updating("Creation")  # Updating the text file.
+        elif not new:  # If new is false.
             self.vendor_file_updating("Modification")
 
+    '''
+    The add_or_remove products function uses a while loop, if statements and try + except for defending inputs.
+    As well, after an input is made that satisfies these conditions, it is added or deleted from the self/vendor's
+    product dictionary.
+    '''
+
     def product_display(self):
-        print("\nThese are the available items at " + self.name + ":")
-        for x in self.product_offerings:
-            print("\nItem: " + x + "\nPrice: $" + str(self.product_offerings[x]))
+        print("\nThese are the available items at the " + self.name + " vendor:")  # Showing the user the vendor's name
+        for x in self.product_offerings:  # Looping through the dictionary.
+            print("\nItem: " + x + "\nPrice: $" + str(self.product_offerings[x]))  # Showing the user.
+
+    '''
+    The product_display function uses a for loop to cycle through the product offerings dictionary for the called upon
+    vendor. Product name and price is shown to the user.
+    '''
 
     def vendor_file_updating(self, reason):
-        vendor_offerings_list = []
-        for k, v in self.product_offerings.items():
-            vendor_offerings_list.append(str(k) + "," + str(v))
-        vendor_offerings_list.sort()
-        vendor_2d_list = file_into_2d_list("Vendors")
+        vendor_offerings_list = []  # Initializing a list.
+        for k, v in self.product_offerings.items():  # Looping through the dictionary.
+            vendor_offerings_list.append(str(k) + "," + str(v))  # Appending these values to a list.
+        vendor_offerings_list.sort()  # Sorting the list of products.
+        vendor_2d_list = file_into_2d_list("Vendors")  # Calling the function to turn a file into a 2d list.
         for x in range(len(vendor_2d_list)):
-            if reason == "Creation":
-                if self.name not in vendor_2d_list:
-                    vendor_2d_list.append([self.name, str([y for y in vendor_offerings_list])])
-                    break
-            elif reason == "Modification":
-                vendor_2d_list[x] = ([self.name, str([y for y in vendor_offerings_list])])
+            if reason == "Creation":  # If statement with parameter.
+                if self.name not in vendor_2d_list:  # Checking that this vendor does not exist already.
+                    vendor_2d_list.append([self.name, str([y for y in vendor_offerings_list])])  # Using list
+                    # comprehension to append the vendor name along with a list of the vendor offerings(including
+                    # their prices).
+                    break  # Ensuring that this is not repeated.
+            elif reason == "Modification":  # Checking for the parameter. This uses elif to avoid the repeating of an
+                # action.
+                vendor_2d_list[x] = ([self.name, str([y for y in vendor_offerings_list])])  # Changing the existing
+                # row of the 2d list, as vendors that are called with modification already exists.
                 break
             elif reason == "Removal":
-                vendor_2d_list.pop(x)
+                del vendor_2d_list[x]  # Removing this vendor from the list.
                 break
-        vendor_2d_list.sort(key=lambda z: (z[0]), reverse=False)
-        vend_file = open("Vendors.txt", "w")
+        vendor_2d_list.sort(key=lambda z: (z[0]), reverse=False)  # Sorting the vendor list alphabetically, according to
+        # row 0. This contains the vendor names.
+        vend_file = open("Vendors.txt", "w")  # File opening.
         for n in range(len(vendor_2d_list)):
-            vend_file.writelines(','.join(str(y) for y in vendor_2d_list[n]) + "\n")
-        vend_file.close()
-        last_line_deleting("Vendors")
+            vend_file.writelines(','.join(str(y) for y in vendor_2d_list[n]) + "\n")  # Writing the 2d list to the file.
+        vend_file.close()  # File closing.
+        last_line_deleting("Vendors")  # Deleting the last line of the file, to prevent future errors.
+
+        '''
+        The vendor_file_updating function turns the product_offerings dictionary into a list. The vendor file is turned
+        into a 2d list. Various points of this list are edited based upon parameter input. After this, the 2d list is
+        written to the file.
+        '''
 
 
-def file_into_2d_list(filename):
-    opening = open(str(filename) + ".txt", "r")
-    final_2d_list = [x.split(",") for x in opening.read().split("\n")]
-    opening.close()
-    return final_2d_list
+def file_into_2d_list(filename):  # This function is not within a class as it does not exclusively relate to a class.
+    opening = open(str(filename) + ".txt", "r")  # The parameter is added to the file name, and the text file is opened
+    # for reading.
+    final_2d_list = [x.split(",") for x in opening.read().split("\n")]  # List comprehension is used to turn the file
+    # into a 2d list.
+    opening.close()  # File is close.
+    return final_2d_list  # The list is returned.
 
 
-def last_line_deleting(file):
-    reading = open(str(file) + ".txt", "rb+")
-    reading.seek(-2, os.SEEK_END)
-    reading.truncate()
-    reading.close()
+'''
+The file_into_2d_list function uses the parameter to open up a text file. Similar to other parameters within functions,
+this is not defended as all parameter input is controlled by me. In this case, I only input 'Vendors' and 'Employees'
+into this parameter. Therefore, these are the only 2 possible files that can be opened. List comprehension reads the 
+file and turns it into a 2d list. Finally, the file is closed and the list is returned. 
+'''
+
+
+def last_line_deleting(file):  # Similar parameter to the function above, that does not need to be defended.
+    reading = open(str(file) + ".txt", "rb+")  # The file is opened. I am not sure why the file needs to be opened
+    # in binary form.
+    reading.seek(-2, os.SEEK_END)  # This reads two characters back from the file end. Also, the os import is used
+    # for the SEEK_END function.
+    reading.truncate()  # The point from the cursor on is deleted within the file.
+    reading.close()  # File is closed.
+
+
+'''
+Although it is fairly simple, this function is vital to my code. After updating files, one newline would remain. The
+next time a file was opened, issues would occur when rewriting or sorting due to an empty row. Therefore, this removes
+the possibility of an empty 2d list row or file section.
+'''
 
 
 def managing():
-    kyle_dubas = GeneralManager()
+    kyle_dubas = GeneralManager()  # Creating an instance of the GeneralManager class. This is empty as a result
+    # of the super init where values are set using equals signs.
     print("The function below gives you multiple options for controlling vendors and employees.\nYou have the role of"
-          "Kyle Dubas, the 33 year old general manager of the Toronto Maple Leafs.")
-    kyle_dubas.all_options()
+          "Kyle Dubas, the 33 year old general manager of the Toronto Maple Leafs.")  # Instructions.
+    kyle_dubas.all_options()  # The hub/menu style function is called, from the above class instantiation.
 
 
-managing()
+managing() # Calling the managing() function.
