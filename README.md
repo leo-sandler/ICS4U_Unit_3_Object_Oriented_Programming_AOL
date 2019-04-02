@@ -19,6 +19,6 @@ can be viewed. Vendors can be created, or removed. As well, vendor products can 
 
 - The information for vendors and employees is modified within the classes and text files after changes are made.
 
-## File Usage
+## Text Files
 - The text files, _Vendors.txt_ and _Employees.txt_ are utilised within the code.
 - They have some pre-existing data which can be modified through the Python Manager program.
