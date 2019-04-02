@@ -7,7 +7,7 @@ Within this code, you act as the manager for a sports team. You are able to cont
 
 I was looking at including the ability to make a player line-up, but did not as I feel like this code has enough functionality within it and proof of my understanding of classes.
 
-The code runs through the perspective of the general manager, with the bulk of functions relating to this class.
+The code runs through the perspective of the general manager.
 
 ## Code Functionality
 -  The employees(including age, salary, and position) are stored within a text file.
