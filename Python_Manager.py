@@ -494,4 +494,4 @@ def managing():
     kyle_dubas.all_options()  # The hub/menu style function is called, from the above class instantiation.
 
 
-managing() # Calling the managing() function.
+managing()  # Calling the managing() function.
